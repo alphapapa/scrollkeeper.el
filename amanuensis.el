@@ -90,12 +90,11 @@
 
 ;;;; Commands
 
-(cl-defun amanuensis-scroll-contents-down (&optional (lines amanuensis-scroll-distance))
+(cl-defun amanuensis-scroll-contents-up (&optional (lines amanuensis-scroll-distance))
   "Scroll page contents down by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
 window height; see `amanuensis-scroll-distance'."
   (interactive)
-  (setq lines (* -1 lines))
   (let ((lines (cl-typecase lines
                  (integer lines)
                  (float (floor (* lines (window-text-height))))))
@@ -108,12 +107,12 @@ window height; see `amanuensis-scroll-distance'."
       (funcall amanuensis-guideline-fn))
     (scroll-up lines)))
 
-(cl-defun amanuensis-scroll-contents-up (&optional (lines amanuensis-scroll-distance))
+(cl-defun amanuensis-scroll-contents-down (&optional (lines amanuensis-scroll-distance))
   "Scroll page contents up by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
 window height; see `amanuensis-scroll-distance'."
   (interactive)
-  (amanuensis-scroll-contents-down (* -1 lines)))
+  (amanuensis-scroll-contents-up (* -1 lines)))
 
 ;;;; Functions
 
