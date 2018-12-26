@@ -20,12 +20,21 @@
 
 ;;; Commentary:
 
+;; This package provides scrolling commands and several customization
+;; options.  The scrolling commands use `pulse' to display a quickly
+;; fading guideline on the line at which new contents are visible
+;; after scrolling, helping your eyes to keep their place in the
+;; buffer.
+
 ;;;; Credits
 
 ;; Inspired by Clemens Radermacher's blog post,
 ;; <https://with-emacs.com/posts/keep-scrollin-scrollin-scrollin/>.
 
 ;;;; Prior art
+
+;; TODO: Review and compare these.  I don't think they do quite the
+;; same thing, but I'm not sure.
 
 ;; +  =on-screen=: https://github.com/michael-heerdegen/on-screen.el
 ;; +  =highlight-context-line=: https://github.com/ska2342/highlight-context-line/
@@ -47,33 +56,46 @@
   :link '(url-link "https://github.com/alphapapa/amanuensis.el")
   :group 'convenience)
 
-(defcustom amanuensis-scroll-amount 0.75
+(defcustom amanuensis-scroll-distance 0.75
   "How far to scroll."
   :type '(choice (integer :tag "Number of lines")
                  (float :tag "Ratio of window size")))
 
-(defcustom amanuensis-contents-pulse-interval 0.025
-  "How often to update guideline pulse steps in seconds."
+(defcustom amanuensis-contents-pulse-interval 0.05
+  "How often to update guideline pulse steps, in seconds."
   :type 'float)
 
 (defcustom amanuensis-contents-pulse-steps 10
   "Number of steps for guideline pulses."
   :type 'integer)
 
+(defcustom amanuensis-guideline-fn #'amanuensis--highlight-line
+  "Function used to display the guideline."
+  :type '(choice (const :tag "Highlight line" amanuensis--highlight-line)
+                 (const :tag "Insert thin line" amanuensis--insert-line)))
+
 ;;;; Faces
 
-(defface amanuensis-contents-guideline
+(defface amanuensis-guideline-highlight
+  ;; FIXME: I picked `font-lock-string-face' because it looks nice
+  ;; with my theme.  Maybe not the best default.
   `((t :background ,(face-attribute 'font-lock-string-face :foreground)))
-  "Face for scrolling guideline.")
+  "Face for highlighting scrolling guideline.")
+
+(defface amanuensis-guideline-thinline
+  ;; FIXME: 0.1 is still not as thin as I would like, but I don't know
+  ;; if it's possible to make it thinner.
+  `((t :height 0.1 :background "red"))
+  "Face for thinline guideline.")
 
 ;;;; Commands
 
-(cl-defun amanuensis-scroll-contents-down (&optional (lines amanuensis-scroll-amount))
+(cl-defun amanuensis-scroll-contents-down (&optional (lines amanuensis-scroll-distance))
   "Scroll page contents down by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
-window height; see `amanuensis-scroll-amount'."
+window height; see `amanuensis-scroll-distance'."
   (interactive)
-  (setq lines (* -1 lines ))
+  (setq lines (* -1 lines))
   (let ((lines (cl-typecase lines
                  (integer lines)
                  (float (floor (* lines (window-text-height))))))
@@ -83,45 +105,30 @@ window height; see `amanuensis-scroll-amount'."
       (move-to-window-line (if (< lines 0)
                                0
                              -1))
-      (cl-letf (((symbol-function 'pulse-momentary-highlight-overlay)
-                 (symbol-function 'amanuensis--pulse-momentary-highlight-overlay)))
-        (pulse-momentary-highlight-one-line (point) 'amanuensis-contents-guideline)))
+      (funcall amanuensis-guideline-fn))
     (scroll-up lines)))
 
-(cl-defun amanuensis-scroll-contents-up (&optional (lines amanuensis-scroll-amount))
+(cl-defun amanuensis-scroll-contents-up (&optional (lines amanuensis-scroll-distance))
   "Scroll page contents up by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
-window height; see `amanuensis-scroll-amount'."
+window height; see `amanuensis-scroll-distance'."
   (interactive)
   (amanuensis-scroll-contents-down (* -1 lines)))
 
 ;;;; Functions
 
-(defun amanuensis--pulse-momentary-highlight-overlay (o &optional face)
-  "Pulse the overlay O.
-Optional argument FACE specifies the face to do the highlighting.
+(defun amanuensis--highlight-line ()
+  "Pulse-highlight the line at point."
+  (pulse-momentary-highlight-one-line (point) 'amanuensis-guideline-highlight))
 
-Like `pulse-momentary-highlight-overlay', but does not clear on
-next command."
-  ;; We don't support simultaneous highlightings.
-  (pulse-momentary-unhighlight)
-  (overlay-put o 'original-face (overlay-get o 'face))
-  (setq pulse-momentary-overlay o)
-  (if (eq pulse-flag 'never)
-      nil
-    (if (or (not pulse-flag) (not (pulse-available-p)))
-	;; Provide a face
-	(overlay-put o 'face (or face 'pulse-highlight-start-face))
-      ;; Pulse it.
-      (overlay-put o 'face 'pulse-highlight-face)
-      ;; The pulse function puts FACE onto 'pulse-highlight-face.
-      ;; Thus above we put our face on the overlay, but pulse
-      ;; with a reference face needed for the color.
-      (pulse-reset-face face)
-      (setq pulse-momentary-timer
-            (run-with-timer 0 pulse-delay #'pulse-tick
-                            (time-add (current-time)
-                                      (* pulse-delay pulse-iterations)))))))
+(defun amanuensis--insert-line ()
+  "Pulse-highlight a thin line between lines."
+  ;; Like `pulse-momentary-highlight-region'.
+  (save-excursion
+    (let ((o (make-overlay (line-beginning-position) (line-beginning-position))))
+      (overlay-put o 'pulse-delete t)
+      (overlay-put o 'before-string (propertize "\n" 'face 'amanuensis-guideline-thinline))
+      (pulse-momentary-highlight-overlay o 'amanuensis-guideline-thinline))))
 
 ;;;; Footer
 
