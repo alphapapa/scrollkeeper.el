@@ -46,6 +46,8 @@
 
 ;; MAYBE: Rename to scrollkeeper.
 
+;; MAYBE: Use different faces for scrolling down and up.
+
 ;;;; Requirements
 
 (require 'cl-lib)
