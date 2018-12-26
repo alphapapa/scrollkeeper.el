@@ -1,4 +1,4 @@
-;;; amanuensis.el --- Guiding your scrolling  -*- lexical-binding: t; -*-
+;;; scrollkeeper.el --- Keep scrolling on-target  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Adam Porter
 
@@ -42,11 +42,11 @@
 ;;    helpful when scrolling--but probably not when using this package,
 ;;    as they would surely be seizure-inducing.
 
-;;; Code:
-
-;; MAYBE: Rename to scrollkeeper.
+;;; TODOs:
 
 ;; MAYBE: Use different faces for scrolling down and up.
+
+;;; Code:
 
 ;;;; Requirements
 
@@ -55,52 +55,52 @@
 
 ;;;; Customization
 
-(defgroup amanuensis nil
+(defgroup scrollkeeper nil
   "Scroll with a helpful guideline."
-  :link '(url-link "https://github.com/alphapapa/amanuensis.el")
+  :link '(url-link "https://github.com/alphapapa/scrollkeeper.el")
   :group 'convenience)
 
-(defcustom amanuensis-scroll-distance 0.75
+(defcustom scrollkeeper-scroll-distance 0.75
   "Scroll this far with each command.
 This may be let-bound in custom commands, or buffer-locally."
   :type '(choice (integer :tag "Number of lines")
                  (float :tag "Ratio of window size")))
 
-(defcustom amanuensis-scroll-steps 5
+(defcustom scrollkeeper-scroll-steps 3
   "Scroll in this many steps.
-The lines computed from `amanuensis-scroll-distance' are divided
+The lines computed from `scrollkeeper-scroll-distance' are divided
 into this many steps.
 
 In a heavily font-locked buffer, scrolling may be slower, so this
 variable could be set buffer-locally to a lower value."
   :type 'integer)
 
-(defcustom amanuensis-scroll-step-delay 0.001
+(defcustom scrollkeeper-scroll-step-delay 0.001
   "Scroll one step ahead at this interval, in seconds."
   :type 'float)
 
-(defcustom amanuensis-guideline-pulse-interval 0.05
+(defcustom scrollkeeper-guideline-pulse-interval 0.05
   "Step through guideline pulsing at this interval, in seconds."
   :type 'float)
 
-(defcustom amanuensis-guideline-pulse-steps 10
+(defcustom scrollkeeper-guideline-pulse-steps 10
   "Divide guideline pulsing into this many steps."
   :type 'integer)
 
-(defcustom amanuensis-guideline-fn #'amanuensis--highlight-line
+(defcustom scrollkeeper-guideline-fn #'scrollkeeper--highlight-line
   "Display the guideline with this function."
-  :type '(choice (const :tag "Highlight line" amanuensis--highlight-line)
-                 (const :tag "Insert thin line" amanuensis--insert-line)))
+  :type '(choice (const :tag "Highlight line" scrollkeeper--highlight-line)
+                 (const :tag "Insert thin line" scrollkeeper--insert-line)))
 
 ;;;; Faces
 
-(defface amanuensis-guideline-highlight
+(defface scrollkeeper-guideline-highlight
   ;; FIXME: I picked `font-lock-string-face' because it looks nice
   ;; with my theme.  Maybe not the best default.
   `((t :background ,(face-attribute 'font-lock-string-face :foreground)))
   "Face for highlighting scrolling guideline.")
 
-(defface amanuensis-guideline-thinline
+(defface scrollkeeper-guideline-thinline
   ;; FIXME: 0.1 is still not as thin as I would like, but I don't know
   ;; if it's possible to make it thinner.
   `((t :height 0.1 :background "red"))
@@ -108,50 +108,50 @@ variable could be set buffer-locally to a lower value."
 
 ;;;; Commands
 
-(cl-defun amanuensis-scroll-contents-up (&optional (lines amanuensis-scroll-distance))
+(cl-defun scrollkeeper-scroll-contents-up (&optional (lines scrollkeeper-scroll-distance))
   "Scroll page contents down by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
-window height; see `amanuensis-scroll-distance'."
+window height; see `scrollkeeper-scroll-distance'."
   (interactive)
   (let* ((lines (cl-typecase lines
                   (integer lines)
                   (float (floor (* lines (window-text-height))))))
-         (steps (floor (/ lines amanuensis-scroll-steps)))
-         (pulse-delay amanuensis-guideline-pulse-interval)
-         (pulse-iterations amanuensis-guideline-pulse-steps))
+         (steps (floor (/ lines scrollkeeper-scroll-steps)))
+         (pulse-delay scrollkeeper-guideline-pulse-interval)
+         (pulse-iterations scrollkeeper-guideline-pulse-steps))
     (save-excursion
       (move-to-window-line (if (< lines 0)
                                0
                              -1))
-      (funcall amanuensis-guideline-fn))
-    (dotimes (_ amanuensis-scroll-steps)
+      (funcall scrollkeeper-guideline-fn))
+    (dotimes (_ scrollkeeper-scroll-steps)
       (scroll-up steps)
-      (sit-for amanuensis-scroll-step-delay))))
+      (sit-for scrollkeeper-scroll-step-delay))))
 
-(cl-defun amanuensis-scroll-contents-down (&optional (lines amanuensis-scroll-distance))
+(cl-defun scrollkeeper-scroll-contents-down (&optional (lines scrollkeeper-scroll-distance))
   "Scroll page contents up by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
-window height; see `amanuensis-scroll-distance'."
+window height; see `scrollkeeper-scroll-distance'."
   (interactive)
-  (amanuensis-scroll-contents-up (* -1 lines)))
+  (scrollkeeper-scroll-contents-up (* -1 lines)))
 
 ;;;; Functions
 
-(defun amanuensis--highlight-line ()
+(defun scrollkeeper--highlight-line ()
   "Pulse-highlight the line at point."
-  (pulse-momentary-highlight-one-line (point) 'amanuensis-guideline-highlight))
+  (pulse-momentary-highlight-one-line (point) 'scrollkeeper-guideline-highlight))
 
-(defun amanuensis--insert-line ()
+(defun scrollkeeper--insert-line ()
   "Pulse-highlight a thin line between lines."
   ;; Like `pulse-momentary-highlight-region'.
   (save-excursion
     (let ((o (make-overlay (line-beginning-position) (line-beginning-position))))
       (overlay-put o 'pulse-delete t)
-      (overlay-put o 'before-string (propertize "\n" 'face 'amanuensis-guideline-thinline))
-      (pulse-momentary-highlight-overlay o 'amanuensis-guideline-thinline))))
+      (overlay-put o 'before-string (propertize "\n" 'face 'scrollkeeper-guideline-thinline))
+      (pulse-momentary-highlight-overlay o 'scrollkeeper-guideline-thinline))))
 
 ;;;; Footer
 
-(provide 'amanuensis)
+(provide 'scrollkeeper)
 
-;;; amanuensis.el ends here
+;;; scrollkeeper.el ends here
