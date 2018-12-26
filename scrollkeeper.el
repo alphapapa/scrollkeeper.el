@@ -21,10 +21,11 @@
 ;;; Commentary:
 
 ;; This package provides scrolling commands and several customization
-;; options.  The scrolling commands use `pulse' to display a quickly
-;; fading guideline on the line at which new contents are visible
-;; after scrolling, helping your eyes to keep their place in the
-;; buffer.
+;; options.  The commands use `pulse' to display a quickly fading
+;; guideline on the line at which new contents are visible after
+;; scrolling.  Also, scrolling can be divided into adjustable steps at
+;; the desired speed.  Together, these features help your eyes to keep
+;; their place in the buffer while scrolling.
 
 ;;;; Credits
 
