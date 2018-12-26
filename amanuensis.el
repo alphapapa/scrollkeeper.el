@@ -44,6 +44,8 @@
 
 ;;; Code:
 
+;; MAYBE: Rename to scrollkeeper.
+
 ;;;; Requirements
 
 (require 'cl-lib)
