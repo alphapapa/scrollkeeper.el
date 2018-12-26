@@ -61,20 +61,34 @@
   :group 'convenience)
 
 (defcustom amanuensis-scroll-distance 0.75
-  "How far to scroll."
+  "Scroll this far with each command.
+This may be let-bound in custom commands, or buffer-locally."
   :type '(choice (integer :tag "Number of lines")
                  (float :tag "Ratio of window size")))
 
-(defcustom amanuensis-contents-pulse-interval 0.05
-  "How often to update guideline pulse steps, in seconds."
+(defcustom amanuensis-scroll-steps 5
+  "Scroll in this many steps.
+The lines computed from `amanuensis-scroll-distance' are divided
+into this many steps.
+
+In a heavily font-locked buffer, scrolling may be slower, so this
+variable could be set buffer-locally to a lower value."
+  :type 'integer)
+
+(defcustom amanuensis-scroll-step-delay 0.001
+  "Scroll one step ahead at this interval, in seconds."
   :type 'float)
 
-(defcustom amanuensis-contents-pulse-steps 10
-  "Number of steps for guideline pulses."
+(defcustom amanuensis-guideline-pulse-interval 0.05
+  "Step through guideline pulsing at this interval, in seconds."
+  :type 'float)
+
+(defcustom amanuensis-guideline-pulse-steps 10
+  "Divide guideline pulsing into this many steps."
   :type 'integer)
 
 (defcustom amanuensis-guideline-fn #'amanuensis--highlight-line
-  "Function used to display the guideline."
+  "Display the guideline with this function."
   :type '(choice (const :tag "Highlight line" amanuensis--highlight-line)
                  (const :tag "Insert thin line" amanuensis--insert-line)))
 
@@ -99,17 +113,20 @@
 LINES may be an integer number of lines or a float ratio of
 window height; see `amanuensis-scroll-distance'."
   (interactive)
-  (let ((lines (cl-typecase lines
-                 (integer lines)
-                 (float (floor (* lines (window-text-height))))))
-        (pulse-delay amanuensis-contents-pulse-interval)
-        (pulse-iterations amanuensis-contents-pulse-steps))
+  (let* ((lines (cl-typecase lines
+                  (integer lines)
+                  (float (floor (* lines (window-text-height))))))
+         (steps (floor (/ lines amanuensis-scroll-steps)))
+         (pulse-delay amanuensis-guideline-pulse-interval)
+         (pulse-iterations amanuensis-guideline-pulse-steps))
     (save-excursion
       (move-to-window-line (if (< lines 0)
                                0
                              -1))
       (funcall amanuensis-guideline-fn))
-    (scroll-up lines)))
+    (dotimes (_ amanuensis-scroll-steps)
+      (scroll-up steps)
+      (sit-for amanuensis-scroll-step-delay))))
 
 (cl-defun amanuensis-scroll-contents-down (&optional (lines amanuensis-scroll-distance))
   "Scroll page contents up by LINES, displaying a guideline.
