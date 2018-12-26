@@ -27,21 +27,31 @@
 ;; the desired speed.  Together, these features help your eyes to keep
 ;; their place in the buffer while scrolling.
 
+;; To use this package, simply bind these commands to your preferred
+;; keys:
+
+;; + `scrollkeeper-contents-up'
+;; + `scrollkeeper-contents-down'
+
 ;;;; Credits
 
-;; Inspired by Clemens Radermacher's blog post,
-;; <https://with-emacs.com/posts/keep-scrollin-scrollin-scrollin/>.
+;; + Inspired by Clemens Radermacher's blog post, <https://with-emacs.com/posts/keep-scrollin-scrollin-scrollin/>.
+;; + Aided by studying Michael Heerdegen's package, <https://github.com/michael-heerdegen/on-screen.el>.
 
-;;;; Prior art
+;;;; See also
 
-;; TODO: Review and compare these.  I don't think they do quite the
-;; same thing, but I'm not sure.
+;; These packages provide some similar functionality but in very different ways.
 
-;; +  =on-screen=: https://github.com/michael-heerdegen/on-screen.el
-;; +  =highlight-context-line=: https://github.com/ska2342/highlight-context-line/
-;; +  =beacon=: https://github.com/Malabarba/beacon Not the same, but also
-;;    helpful when scrolling--but probably not when using this package,
-;;    as they would surely be seizure-inducing.
+;; + https://github.com/michael-heerdegen/on-screen.el: A more complex
+;; and comprehensive implementation that uses hooks to observe
+;; scrolling in other windows.
+
+;; + https://github.com/ska2342/highlight-context-line/: Highlights
+;; the boundary line statically, using a minor mode rather than
+;; commands.
+
+;; + https://github.com/Malabarba/beacon: Highlights the cursor rather
+;; than the boundary line between new and old content.
 
 ;;; TODOs:
 
@@ -88,10 +98,11 @@ variable could be set buffer-locally to a lower value."
   "Divide guideline pulsing into this many steps."
   :type 'integer)
 
-(defcustom scrollkeeper-guideline-fn #'scrollkeeper--highlight-line
+(defcustom scrollkeeper-guideline-fn #'scrollkeeper--highlight
   "Display the guideline with this function."
-  :type '(choice (const :tag "Highlight line" scrollkeeper--highlight-line)
-                 (const :tag "Insert thin line" scrollkeeper--insert-line)))
+  :type '(choice (const :tag "Highlight line" scrollkeeper--highlight)
+                 (const :tag "Underline line" scrollkeeper--underline)
+                 (const :tag "Insert thin line" scrollkeeper--thinline)))
 
 ;;;; Faces
 
@@ -107,9 +118,18 @@ variable could be set buffer-locally to a lower value."
   `((t :height 0.1 :background "red"))
   "Face for thinline guideline.")
 
+(defface scrollkeeper-guideline-underline
+  ;; Thanks to `on-screen-narrow-line' for showing how to use the
+  ;; `extra-expanded' value for `:width'.  It doesn't seem to be
+  ;; mentioned in the Elisp manual, so it's not easy to discover.
+  `((t :width extra-expanded
+       :underline (:color ,(face-attribute 'font-lock-string-face :foreground) :style wave)))
+  "Face for underline guideline.")
+
 ;;;; Commands
 
-(cl-defun scrollkeeper-scroll-contents-up (&optional (lines scrollkeeper-scroll-distance))
+;;;###autoload
+(cl-defun scrollkeeper-contents-up (&optional (lines scrollkeeper-scroll-distance))
   "Scroll page contents down by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
 window height; see `scrollkeeper-scroll-distance'."
@@ -129,20 +149,21 @@ window height; see `scrollkeeper-scroll-distance'."
       (scroll-up steps)
       (sit-for scrollkeeper-scroll-step-delay))))
 
-(cl-defun scrollkeeper-scroll-contents-down (&optional (lines scrollkeeper-scroll-distance))
+;;;###autoload
+(cl-defun scrollkeeper-contents-down (&optional (lines scrollkeeper-scroll-distance))
   "Scroll page contents up by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
 window height; see `scrollkeeper-scroll-distance'."
   (interactive)
-  (scrollkeeper-scroll-contents-up (* -1 lines)))
+  (scrollkeeper-contents-up (* -1 lines)))
 
 ;;;; Functions
 
-(defun scrollkeeper--highlight-line ()
+(defun scrollkeeper--highlight ()
   "Pulse-highlight the line at point."
   (pulse-momentary-highlight-one-line (point) 'scrollkeeper-guideline-highlight))
 
-(defun scrollkeeper--insert-line ()
+(defun scrollkeeper--thinline ()
   "Pulse-highlight a thin line between lines."
   ;; Like `pulse-momentary-highlight-region'.
   (save-excursion
@@ -150,6 +171,23 @@ window height; see `scrollkeeper-scroll-distance'."
       (overlay-put o 'pulse-delete t)
       (overlay-put o 'before-string (propertize "\n" 'face 'scrollkeeper-guideline-thinline))
       (pulse-momentary-highlight-overlay o 'scrollkeeper-guideline-thinline))))
+
+(defun scrollkeeper--underline ()
+  "Pulse-highlight an underline overlay on the line at point."
+  ;; Like `pulse-momentary-highlight-region'.
+  (save-excursion
+    (let ((o (make-overlay (line-beginning-position) (line-end-position))))
+      (overlay-put o 'pulse-delete t)
+      ;; Thanks to `on-screen-make-narrow-line-overlay' for showing
+      ;; how to get the details of the `space' `display' property
+      ;; right.
+      (overlay-put o 'after-string
+                   (propertize " "
+                               'face 'scrollkeeper-guideline-underline
+                               'display `(space :align-to ,(window-width))
+                               ;; FIXME: Not sure if `cursor' is necessary here.  Doesn't seem to have any effect.
+                               'cursor 0))
+      (pulse-momentary-highlight-overlay o 'scrollkeeper-guideline-underline))))
 
 ;;;; Footer
 
