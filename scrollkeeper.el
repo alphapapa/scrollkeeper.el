@@ -133,7 +133,7 @@ variable could be set buffer-locally to a lower value."
 
 ;;;###autoload
 (cl-defun scrollkeeper-contents-up (&optional (lines scrollkeeper-scroll-distance))
-  "Scroll page contents down by LINES, displaying a guideline.
+  "Scroll page contents up by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
 window height; see `scrollkeeper-scroll-distance'."
   (interactive)
@@ -153,12 +153,18 @@ window height; see `scrollkeeper-scroll-distance'."
       (sit-for scrollkeeper-scroll-step-delay))))
 
 ;;;###autoload
+(defalias 'scrollkeeper-down #'scrollkeeper-contents-up)
+
+;;;###autoload
 (cl-defun scrollkeeper-contents-down (&optional (lines scrollkeeper-scroll-distance))
-  "Scroll page contents up by LINES, displaying a guideline.
+  "Scroll page contents down by LINES, displaying a guideline.
 LINES may be an integer number of lines or a float ratio of
 window height; see `scrollkeeper-scroll-distance'."
   (interactive)
   (scrollkeeper-contents-up (* -1 lines)))
+
+;;;###autoload
+(defalias 'scrollkeeper-up #'scrollkeeper-contents-down)
 
 ;;;; Functions
 
