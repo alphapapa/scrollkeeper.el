@@ -1,0 +1,105 @@
+#+TITLE: scrollkeeper.el
+#+PROPERTY: LOGGING nil
+
+# Note: This readme works with the org-make-toc <https://github.com/alphapapa/org-make-toc> package, which automatically updates the table of contents.
+
+# [[https://melpa.org/#/package-name][file:https://melpa.org/packages/scrollkeeper.el-badge.svg]] [[https://stable.melpa.org/#/package-name][file:https://stable.melpa.org/packages/scrollkeeper.el-badge.svg]]
+
+This package provides scrolling commands and several customization options.  The commands use ~pulse~ to display a quickly fading guideline, or another chosen style, on the line at which new contents are visible after scrolling.  Also, scrolling can be divided into steps which proceed at the desired speed.  Together, these features help your eyes to keep their place in the buffer while scrolling.
+
+** Screencast
+:PROPERTIES:
+:TOC:      ignore
+:END:
+
+It's hard to capture in a GIF, but here is a [[example.mkv][video]] demonstration ([[https://i.imgur.com/P2nAcRJ.mp4][view on Imgur]]).
+
+* Contents                                                         :noexport:
+:PROPERTIES:
+:TOC:      this
+:END:
+  -  [[#installation][Installation]]
+  -  [[#usage][Usage]]
+  -  [[#changelog][Changelog]]
+  -  [[#credits][Credits]]
+
+* Installation
+:PROPERTIES:
+:TOC:      0
+:END:
+
+** Quelpa
+
+[[https://framagit.org/steckerhalter/quelpa-use-package][quelpa-use-package]] makes it easy to install, and [[https://github.com/noctuid/general.el][general]] makes it easy to configure key bindings:
+
+#+BEGIN_SRC elisp
+  (use-package scrollkeeper
+    :quelpa (scrollkeeper :fetcher github :repo "alphapapa/scrollkeeper.el")
+    :general ([remap scroll-up-command] #'scrollkeeper-contents-up
+              [remap scroll-down-command] #'scrollkeeper-contents-down))
+#+END_SRC
+
+** MELPA
+
+=scrollkeeper= isn't on MELPA yet.
+
+* Usage
+:PROPERTIES:
+:TOC:      0
+:END:
+
+  Run one of these commands:
+
+  +  ~scrollkeeper-up~, ~scrollkeeper-contents-down~: Scroll the window up, or the contents down, depending on your perspective.
+  +  ~scrollkeeper-down~, ~scrollkeeper-contents-up~: Scroll the window down, or the contents up, depending on your perspective.
+
+** Tips
+
++ You can customize settings in the =scrollkeeper= group.
+
+* Changelog
+:PROPERTIES:
+:TOC:      0
+:END:
+
+** 0.1-pre
+
+Initial release.
+
+* Credits
+:PROPERTIES:
+:TOC:      0
+:END:
+
++  Inspired by Clemens Radermacher's blog post, [[https://with-emacs.com/posts/keep-scrollin-scrollin-scrollin/][Scrollin', scrollin', scrollin']].
++  Aided by studying Michael Heerdegen's package, [[https://github.com/michael-heerdegen/on-screen.el][on-screen]].
+
+** See also
+
+These packages provide some similar functionality but in very different ways.
+
++ [[https://github.com/michael-heerdegen/on-screen.el][on-screen]] :: A more complex and comprehensive implementation that uses hooks to observe scrolling in other windows.
++ [[https://github.com/ska2342/highlight-context-line/][highlight-context-line]] :: Highlights the boundary line statically, using a minor mode rather than commands.
++ [[https://github.com/Malabarba/beacon][beacon]] :: Highlights the cursor rather than the boundary line between new and old content.
+
+* Development
+:PROPERTIES:
+:TOC:      ignore
+:END:
+
+Bug reports, feature requests, suggestions — /oh my/!
+
+* License
+:PROPERTIES:
+:TOC:      ignore
+:END:
+
+GPLv3
+
+# Local Variables:
+# eval: (require 'org-make-toc)
+# before-save-hook: org-make-toc
+# org-export-with-properties: ()
+# org-export-with-title: t
+# End:
+
