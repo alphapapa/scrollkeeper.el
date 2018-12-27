@@ -141,7 +141,7 @@ window height; see `scrollkeeper-scroll-distance'."
   (let* ((lines (cl-typecase lines
                   (integer lines)
                   (float (floor (* lines (window-text-height))))))
-         (steps (floor (/ lines scrollkeeper-scroll-steps)))
+         (step-lines (floor (/ lines scrollkeeper-scroll-steps)))
          (pulse-delay scrollkeeper-guideline-pulse-interval)
          (pulse-iterations scrollkeeper-guideline-pulse-steps))
     (save-excursion
@@ -150,7 +150,7 @@ window height; see `scrollkeeper-scroll-distance'."
                              -1))
       (funcall scrollkeeper-guideline-fn))
     (dotimes (_ scrollkeeper-scroll-steps)
-      (scroll-up steps)
+      (scroll-up step-lines)
       (sit-for scrollkeeper-scroll-step-delay))))
 
 ;;;###autoload
