@@ -1,4 +1,4 @@
-;;; scrollkeeper.el --- Keep scrolling on-target  -*- lexical-binding: t; -*-
+;;; scrollkeeper.el --- Configurable scrolling commands with visual guidelines  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Adam Porter
 
@@ -33,8 +33,8 @@
 ;; To use this package, simply bind these commands to your preferred
 ;; keys:
 
-;; + `scrollkeeper-contents-up'
-;; + `scrollkeeper-contents-down'
+;; + `scrollkeeper-up'
+;; + `scrollkeeper-down'
 
 ;;;; Credits
 
@@ -109,16 +109,17 @@ variable could be set buffer-locally to a lower value."
 
 ;;;; Faces
 
+;; FIXME: I picked `font-lock-string-face' because it looks nice with
+;; my theme.  Maybe not the best default.
+
 (defface scrollkeeper-guideline-highlight
-  ;; FIXME: I picked `font-lock-string-face' because it looks nice
-  ;; with my theme.  Maybe not the best default.
   `((t :background ,(face-attribute 'font-lock-string-face :foreground)))
   "Face for highlighting scrolling guideline.")
 
 (defface scrollkeeper-guideline-thinline
   ;; FIXME: 0.1 is still not as thin as I would like, but I don't know
   ;; if it's possible to make it thinner.
-  `((t :height 0.1 :background "red"))
+  `((t :height 0.1 :background ,(face-attribute 'font-lock-string-face :foreground)))
   "Face for thinline guideline.")
 
 (defface scrollkeeper-guideline-underline
