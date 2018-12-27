@@ -1,4 +1,4 @@
-;;; scrollkeeper.el --- Configurable scrolling commands with visual guidelines  -*- lexical-binding: t; -*-
+;;; scrollkeeper.el --- Custom scrolling commands with visual guidelines  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Adam Porter
 
