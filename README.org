@@ -3,7 +3,9 @@
 
 # Note: This readme works with the org-make-toc <https://github.com/alphapapa/org-make-toc> package, which automatically updates the table of contents.
 
-# [[https://melpa.org/#/package-name][file:https://melpa.org/packages/scrollkeeper.el-badge.svg]] [[https://stable.melpa.org/#/package-name][file:https://stable.melpa.org/packages/scrollkeeper.el-badge.svg]]
+[[https://melpa.org/#/scrollkeeper][file:https://melpa.org/packages/scrollkeeper-badge.svg]]
+
+# [[https://stable.melpa.org/#/scrollkeeper][file:https://stable.melpa.org/packages/scrollkeeper-badge.svg]]
 
 This package provides scrolling commands and several customization options.  The commands use ~pulse~ to display a quickly fading guideline, or another chosen style, on the line at which new contents are visible after scrolling.  Also, scrolling can be divided into steps which proceed at the desired speed.  Together, these features help your eyes to keep their place in the buffer while scrolling.
 
@@ -28,6 +30,10 @@ It's hard to capture in a GIF, but here is a [[example.mkv][video]] demonstratio
 :TOC:      0
 :END:
 
+** MELPA
+
+Just install from MELPA, then bind the commands and customize the =scrollkeeper= group as desired.
+
 ** Quelpa
 
 [[https://framagit.org/steckerhalter/quelpa-use-package][quelpa-use-package]] makes it easy to install, and [[https://github.com/noctuid/general.el][general]] makes it easy to configure key bindings:
@@ -38,10 +44,6 @@ It's hard to capture in a GIF, but here is a [[example.mkv][video]] demonstratio
     :general ([remap scroll-up-command] #'scrollkeeper-contents-up
               [remap scroll-down-command] #'scrollkeeper-contents-down))
 #+END_SRC
-
-** MELPA
-
-=scrollkeeper= isn't on MELPA yet.
 
 * Usage
 :PROPERTIES:
