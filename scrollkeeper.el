@@ -5,7 +5,7 @@
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; URL: https://github.com/alphapapa/scrollkeeper.el
 ;; Keywords: convenience
-;; Version: 0.1-pre
+;; Version: 0.1
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify

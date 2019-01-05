@@ -3,9 +3,7 @@
 
 # Note: This readme works with the org-make-toc <https://github.com/alphapapa/org-make-toc> package, which automatically updates the table of contents.
 
-[[https://melpa.org/#/scrollkeeper][file:https://melpa.org/packages/scrollkeeper-badge.svg]]
-
-# [[https://stable.melpa.org/#/scrollkeeper][file:https://stable.melpa.org/packages/scrollkeeper-badge.svg]]
+[[https://melpa.org/#/scrollkeeper][file:https://melpa.org/packages/scrollkeeper-badge.svg]] [[https://stable.melpa.org/#/scrollkeeper][file:https://stable.melpa.org/packages/scrollkeeper-badge.svg]]
 
 This package provides scrolling commands and several customization options.  The commands use ~pulse~ to display a quickly fading guideline, or another chosen style, on the line at which new contents are visible after scrolling.  Also, scrolling can be divided into steps which proceed at the desired speed.  Together, these features help your eyes to keep their place in the buffer while scrolling.
 
@@ -64,7 +62,7 @@ Just install from MELPA, then bind the commands and customize the =scrollkeeper=
 :TOC:      0
 :END:
 
-** 0.1-pre
+** 0.1
 
 Initial release.
 
