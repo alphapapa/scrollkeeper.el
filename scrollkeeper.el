@@ -107,27 +107,53 @@ variable could be set buffer-locally to a lower value."
                  (const :tag "Underline line" scrollkeeper--underline)
                  (const :tag "Insert thin line" scrollkeeper--thinline)))
 
+(defcustom scrollkeeper-guideline-dynamic-background '(font-lock-string-face . :foreground)
+  "Dynamically set guideline face background color.
+When the `scrollkeeper-guideline' faces have unspecified
+background colors, they are set according to this.  This allows
+the guideline faces to automatically adapt to changing themes
+without user intervention.
+
+For example, you could set the face name to
+`font-lock-string-face', and the attribute keyword to
+`:foreground', and the guideline's background color would be set
+to the string face's foreground color (which should be visible
+against the background in every theme).
+
+Setting the background colors of faces
+`scrollkeeper-guideline-highlight' and
+`scrollkeeper-guideline-thinline' overrides this setting."
+  :type '(cons (face :tag "Face")
+               (symbol :tag "Face attribute keyword")))
+
 ;;;; Faces
 
-;; FIXME: I picked `font-lock-string-face' because it looks nice with
-;; my theme.  Maybe not the best default.
-
-(defface scrollkeeper-guideline-highlight
-  `((t :background ,(face-attribute 'font-lock-string-face :foreground)))
-  "Face for highlighting scrolling guideline.")
+(defface scrollkeeper-guideline-highlight nil
+  "Face for highlighting scrolling guideline.
+If its background color is unspecified, it's set automatically
+according to `scrollkeeper-guideline-dynamic-background', which see.")
 
 (defface scrollkeeper-guideline-thinline
   ;; FIXME: 0.1 is still not as thin as I would like, but I don't know
   ;; if it's possible to make it thinner.
-  `((t :height 0.1 :background ,(face-attribute 'font-lock-string-face :foreground)))
-  "Face for thinline guideline.")
+  `((t :height 0.1))
+  "Face for thinline guideline.
+If its background color is unspecified, it's set automatically
+according to `scrollkeeper-guideline-inherit', which see.")
 
 (defface scrollkeeper-guideline-underline
-  ;; Thanks to `on-screen-narrow-line' for showing how to use the
-  ;; `extra-expanded' value for `:width'.  It doesn't seem to be
-  ;; mentioned in the Elisp manual, so it's not easy to discover.
-  `((t :width extra-expanded
-       :underline (:color ,(face-attribute 'font-lock-string-face :foreground) :style wave)))
+  ;; FIXME: The underline only applies to the empty space from the last
+  ;; character on a line to the side of the window.  Not sure if this
+  ;; can be fixed.
+
+  ;; FIXME: I picked `font-lock-string-face' because it looks nice
+  ;; with my theme.  Maybe not the best default.
+
+  ;; NOTE: Unlike the other two faces, this doesn't need to dynamically
+  ;; adapt, because its underline color can be set to the foreground
+  ;; color of another face by inheriting from it.
+  `((t :inherit font-lock-string-face
+       :underline (:style line)))
   "Face for underline guideline.")
 
 ;;;; Commands
@@ -169,13 +195,30 @@ window height; see `scrollkeeper-scroll-distance'."
 
 ;;;; Functions
 
+;; The first two functions check the background color of the appropriate face and, if
+;; unspecified, set it according to `scrollkeeper-guideline-dynamic-background'.  This allows
+;; the face to adapt to theme changes without user intervention.  Profiling shows that this
+;; checking makes no discernible difference in performance, as e.g. `scrollkeeper--highlight'
+;; runs in 0.0004 seconds with and without the checking.  Thanks to Steve Purcell for holding
+;; this code to a higher standard.  :)
+
 (defun scrollkeeper--highlight ()
   "Pulse-highlight the line at point."
+  (when (eq 'unspecified (face-attribute 'scrollkeeper-guideline-highlight :background))
+    (face-spec-set 'scrollkeeper-guideline-highlight
+                   `((t :background ,(face-attribute (car scrollkeeper-guideline-dynamic-background)
+                                                     (cdr scrollkeeper-guideline-dynamic-background))))
+                   'face-defface-spec))
   (pulse-momentary-highlight-one-line (point) 'scrollkeeper-guideline-highlight))
 
 (defun scrollkeeper--thinline ()
   "Pulse-highlight a thin line between lines."
   ;; Like `pulse-momentary-highlight-region'.
+  (when (eq 'unspecified (face-attribute 'scrollkeeper-guideline-thinline :background))
+    (face-spec-set 'scrollkeeper-guideline-thinline
+                   (face-attribute (car scrollkeeper-guideline-dynamic-background)
+                                   (cdr scrollkeeper-guideline-dynamic-background))
+                   'face-defface-spec))
   (save-excursion
     (let ((o (make-overlay (line-beginning-position) (line-beginning-position))))
       (overlay-put o 'pulse-delete t)
