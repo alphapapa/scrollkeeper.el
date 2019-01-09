@@ -5,7 +5,7 @@
 ;; Author: Adam Porter <adam@alphapapa.net>
 ;; URL: https://github.com/alphapapa/scrollkeeper.el
 ;; Keywords: convenience
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -216,8 +216,8 @@ window height; see `scrollkeeper-scroll-distance'."
   ;; Like `pulse-momentary-highlight-region'.
   (when (eq 'unspecified (face-attribute 'scrollkeeper-guideline-thinline :background))
     (face-spec-set 'scrollkeeper-guideline-thinline
-                   (face-attribute (car scrollkeeper-guideline-dynamic-background)
-                                   (cdr scrollkeeper-guideline-dynamic-background))
+                   `((t :background ,(face-attribute (car scrollkeeper-guideline-dynamic-background)
+                                                     (cdr scrollkeeper-guideline-dynamic-background))))
                    'face-defface-spec))
   (save-excursion
     (let ((o (make-overlay (line-beginning-position) (line-beginning-position))))
